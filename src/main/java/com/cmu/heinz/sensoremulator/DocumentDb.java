@@ -13,14 +13,14 @@ import java.util.List;
 public class DocumentDb {
 
     // Replace with your DocumentDB end point and master key.
-    private String END_POINT = "https://sensordatatr.documents.azure.com:443/";
-    private String MASTER_KEY = "NhQAFJMZLkkATjeJm0fuoyMbvZUA3p44XB15eCspgYF6ANvIaBqUcIqMlZ61GRK8saj6AlvxwEWSOa2BfoERtg==";
+    private String END_POINT = "{Endpoint Here}";
+    private String MASTER_KEY = "{Key Here}"
 
     private DocumentClient documentClient = new DocumentClient(END_POINT, MASTER_KEY,
             ConnectionPolicy.GetDefault(), ConsistencyLevel.Session);
     private Gson gson = new Gson();
 
-    private String DATABASE_ID = "FarmSensorDb";
+    private String DATABASE_ID = "{Database Name}";
 
     private Database myDatabase;
     private DocumentCollection documentCollection;
