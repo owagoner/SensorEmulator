@@ -83,7 +83,7 @@ public class SensorGroup {
         BrokeredMessage message = new BrokeredMessage(sensorToRemove.getAddSensorMessage().serialize());
         message.setDate(new Date());
         boolean result  = sq.sendDeleteSensorMessage(message);
-        if(result){
+        if(true){
             sensorToRemove.stopSensor();
             stoppedSensors.remove(sensorToRemove);
             runningSensors.remove(sensorToRemove);

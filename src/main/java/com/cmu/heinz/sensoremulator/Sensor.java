@@ -1,5 +1,6 @@
 package com.cmu.heinz.sensoremulator;
 
+import com.cmu.heinz.resources.DocumentDb;
 import com.cmu.heinz.sensormessage.AddSensorMessage;
 import com.cmu.heinz.sensormessage.SensorReadingMessage;
 import com.microsoft.azure.documentdb.DocumentClientException;
@@ -30,7 +31,9 @@ public class Sensor implements Runnable {
     private String END_POINT;
     private String MASTER_KEY;
     
-    public Sensor(String sensorId, String sensorModel, String sensorManufacturer, double sendFrequencyMin, int dataValueMod, String collectionName, String DATABASE_ID, String END_POINT, String MASTER_KEY) {
+    public Sensor(String sensorId, String sensorModel, String sensorManufacturer, 
+            double sendFrequencyMin, int dataValueMod, String collectionName, 
+            String DATABASE_ID, String END_POINT, String MASTER_KEY) {
         this.sensorId = sensorId;
         this.sensorModel = sensorModel;
         this.sensorManufacturer = sensorManufacturer;
@@ -55,16 +58,17 @@ public class Sensor implements Runnable {
                 }
                 double currentDataReading = dataValueMod + rand.nextDouble() * 4 - 2;
                 
-                SensorDataPoint sdp = new SensorDataPoint(sensorId, sensorHash, currentDataReading, new Date());
-                DocumentDb ddb;
-                try {
-                    ddb = new DocumentDb(DATABASE_ID, END_POINT, MASTER_KEY);
-                    sdp = ddb.addSensorReading(collectionName, sdp);
-                    System.out.println("Stored in db: " + sdp.serialize());
-                } catch (DocumentClientException ex) {
-                    System.out.println("Unable to send data to database.");
-                }
-                SensorReadingMessage srm = new SensorReadingMessage(sensorHash, sdp.getId(), collectionName, DATABASE_ID);
+//                SensorDataPoint sdp = new SensorDataPoint(sensorId, sensorHash, currentDataReading, new Date());
+//                DocumentDb ddb;
+//                try {
+//                    ddb = new DocumentDb(DATABASE_ID, END_POINT, MASTER_KEY);
+//                    sdp = ddb.addSensorReading(collectionName, sdp);
+//                    System.out.println("Stored in db: " + sdp.serialize());
+//                } catch (DocumentClientException ex) {
+//                    System.out.println("Unable to send data to database.");
+//                }
+                SensorReadingMessage srm = 
+                        new SensorReadingMessage(sensorHash, Double.toString(currentDataReading), new Date(), DATABASE_ID);
                 
                 //send message
                 BrokeredMessage message = new BrokeredMessage(srm.serialize());

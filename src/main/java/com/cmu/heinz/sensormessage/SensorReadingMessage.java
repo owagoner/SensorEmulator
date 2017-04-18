@@ -6,6 +6,7 @@
 package com.cmu.heinz.sensormessage;
 
 import com.google.gson.Gson;
+import java.util.Date;
 
 /**
  *
@@ -14,18 +15,16 @@ import com.google.gson.Gson;
 public class SensorReadingMessage {
     
     private String sensorHash;
-    private String documentId;
-    private String documentCollection;
-    private String documentDatabase;
+    private String data;
+    private Date date;
+    private String signature;
 
-    public SensorReadingMessage(String sensorHash, String documentId, String documentCollection, String documentDatabase) {
+    public SensorReadingMessage(String sensorHash, String data, Date date, String signature) {
         this.sensorHash = sensorHash;
-        this.documentId = documentId;
-        this.documentCollection = documentCollection;
-        this.documentDatabase = documentDatabase;
+        this.data = data;
+        this.date = date;
+        this.signature = signature;
     }
-    
-    
     
     public String serialize(){
         Gson gson = new Gson();

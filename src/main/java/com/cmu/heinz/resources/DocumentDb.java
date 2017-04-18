@@ -1,5 +1,6 @@
-package com.cmu.heinz.sensoremulator;
+package com.cmu.heinz.resources;
 
+import com.cmu.heinz.sensoremulator.SensorDataPoint;
 import com.google.gson.Gson;
 import com.microsoft.azure.documentdb.ConnectionPolicy;
 import com.microsoft.azure.documentdb.ConsistencyLevel;
@@ -13,8 +14,8 @@ import java.util.List;
 public class DocumentDb {
 
     // Replace with your DocumentDB end point and master key.
-    private String END_POINT = "https://sensordatatr.documents.azure.com:443/";
-    private String MASTER_KEY = "NhQAFJMZLkkATjeJm0fuoyMbvZUA3p44XB15eCspgYF6ANvIaBqUcIqMlZ61GRK8saj6AlvxwEWSOa2BfoERtg==";
+    private String END_POINT = "";
+    private String MASTER_KEY = "";
 
     private DocumentClient documentClient = new DocumentClient(END_POINT, MASTER_KEY,
             ConnectionPolicy.GetDefault(), ConsistencyLevel.Session);

@@ -12,9 +12,9 @@ public class SensorRun {
 
     private static KeyBoardInput kbi = new KeyBoardInput();
     
-    private static String DATABASE_ID = "{Database Name Here}";
-    private static final String END_POINT = "{Endpoint Here}";
-    private static final String MASTER_KEY = "{Key Here}";
+    private static String DATABASE_ID = "FarmSensorDb";
+    private static final String END_POINT = "https://sensordatatr.documents.azure.com:443/";
+    private static final String MASTER_KEY = "NhQAFJMZLkkATjeJm0fuoyMbvZUA3p44XB15eCspgYF6ANvIaBqUcIqMlZ61GRK8saj6AlvxwEWSOa2BfoERtg==";
     
     public static void main(String[] args) {
 
