@@ -1,16 +1,13 @@
 package com.cmu.heinz.sensoremulator;
 
-import com.cmu.heinz.resources.DocumentDb;
+import com.cmu.heinz.resources.RSA;
 import com.cmu.heinz.sensormessage.AddSensorMessage;
 import com.cmu.heinz.sensormessage.SensorReadingMessage;
-import com.microsoft.azure.documentdb.DocumentClientException;
 import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.Base64;
+import java.math.BigInteger;
 import java.util.Date;
 import java.util.Random;
+import org.bouncycastle.jcajce.provider.digest.Keccak;
 
 /**
  * @version 1.0
@@ -25,25 +22,20 @@ public class Sensor implements Runnable {
     private double sendFrequencyMin;
     private int dataValueMod;
     private String collectionName;
+    private BigInteger d;
+    private BigInteger e = new BigInteger("65537");
     private boolean isCancelled = false;
     private ServiceQueue sq = new ServiceQueue();
-    private String DATABASE_ID;
-    private String END_POINT;
-    private String MASTER_KEY;
-    
-    public Sensor(String sensorId, String sensorModel, String sensorManufacturer, 
-            double sendFrequencyMin, int dataValueMod, String collectionName, 
-            String DATABASE_ID, String END_POINT, String MASTER_KEY) {
+
+    public Sensor(String sensorId, String sensorModel, String sensorManufacturer,
+            double sendFrequencyMin, int dataValueMod, String d) {
         this.sensorId = sensorId;
         this.sensorModel = sensorModel;
         this.sensorManufacturer = sensorManufacturer;
         this.sensorHash = getMetadataHash();
         this.sendFrequencyMin = sendFrequencyMin;
         this.dataValueMod = dataValueMod;
-        this.collectionName = collectionName;
-        this.DATABASE_ID = DATABASE_ID;
-        this.END_POINT = END_POINT;
-        this.MASTER_KEY = MASTER_KEY;
+        this.d = new BigInteger(d);
     }
 
     @Override
@@ -56,25 +48,27 @@ public class Sensor implements Runnable {
                 if (isCancelled) {
                     return;
                 }
+                //Generate random reading
                 double currentDataReading = dataValueMod + rand.nextDouble() * 4 - 2;
                 
-//                SensorDataPoint sdp = new SensorDataPoint(sensorId, sensorHash, currentDataReading, new Date());
-//                DocumentDb ddb;
-//                try {
-//                    ddb = new DocumentDb(DATABASE_ID, END_POINT, MASTER_KEY);
-//                    sdp = ddb.addSensorReading(collectionName, sdp);
-//                    System.out.println("Stored in db: " + sdp.serialize());
-//                } catch (DocumentClientException ex) {
-//                    System.out.println("Unable to send data to database.");
-//                }
-                SensorReadingMessage srm = 
-                        new SensorReadingMessage(sensorHash, Double.toString(currentDataReading), new Date(), DATABASE_ID);
-                
-                //send message
-                BrokeredMessage message = new BrokeredMessage(srm.serialize());
+                //Generate SRM object
+                SensorReadingMessage srm
+                        = new SensorReadingMessage(sensorHash, Double.toString(currentDataReading), new Date());
+                //Serialize object
+                String srmStr = srm.serialize();
+                //Hash message
+                String hashedMessage = getKeccak256Hash(srmStr);
+                //New instance of simple rsa with sensor private key
+                RSA rsa = new RSA(d, e);
+                String encryptedHashedMessage = rsa.encrypt(hashedMessage);
+
+                //send brokeredmessage
+                BrokeredMessage message = new BrokeredMessage(srmStr);
                 message.setDate(new Date());
+                message.setProperty("Signature", encryptedHashedMessage);
                 sq.sendSensorReadingMessage(message);
-                System.out.println("Message sent: " + srm.serialize());
+                
+                System.out.println("Message sent: " + srmStr);
                 Thread.sleep(delayTime);
             }
         } catch (InterruptedException e) {
@@ -103,17 +97,30 @@ public class Sensor implements Runnable {
     public void setCollectionName(String collectionName) {
         this.collectionName = collectionName;
     }
-    
-    private String getMetadataHash(){
-        MessageDigest digest;
-        try {
-            digest = MessageDigest.getInstance("SHA-256");
-            String metadata = this.sensorId + this.sensorModel + this.sensorManufacturer;
-            byte[] hash = digest.digest(metadata.getBytes(StandardCharsets.UTF_8));
-            return Base64.getEncoder().encodeToString(hash);
-        } catch (NoSuchAlgorithmException ex) {
-            System.out.println("Unable to hash sensor metadata");
-            return null;
-        }
+
+    private String getMetadataHash() {
+        Keccak.Digest256 digest = new Keccak.Digest256();
+        String str = this.sensorId + this.sensorModel + this.sensorManufacturer;
+        digest.update(str.getBytes());
+        return "0x" + bytesToHex(digest.digest());
     }
+
+    private String getKeccak256Hash(String str) {
+        Keccak.Digest256 digest = new Keccak.Digest256();
+        digest.update(str.getBytes());
+        return bytesToHex(digest.digest());
+    }
+
+    private final char[] hexArray = "0123456789abcdef".toCharArray();
+
+    public String bytesToHex(byte[] bytes) {
+        char[] hexChars = new char[bytes.length * 2];
+        for (int j = 0; j < bytes.length; j++) {
+            int v = bytes[j] & 0xFF;
+            hexChars[j * 2] = hexArray[v >>> 4];
+            hexChars[j * 2 + 1] = hexArray[v & 0x0F];
+        }
+        return new String(hexChars);
+    }
+
 }

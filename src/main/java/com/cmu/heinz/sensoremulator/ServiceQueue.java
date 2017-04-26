@@ -18,11 +18,11 @@ public class ServiceQueue {
 
     private ServiceBusContract service;
     private String url = "servicebus.windows.net/";
-    private String namespace = "trraspi.";
-    private String key1 = "efNvfvEL8CEl3w1PuxdWK/gfLrC13MqSXly/bT/AYT4=";
-    private String key2 = "4JFqSlwnndaZmuVcKeziF/Azqusm4mWvVjUP+3ZVRV8=";
-    private String endpoint = "Endpoint=sb://trraspi.servicebus.windows.net/;SharedAccessKeyName=iothubroutes_FarmHub;SharedAccessKey=XQVtFCNMXdAd+D23fxnO4xPqPb4GzFaoNDqKcDpY6KM=;EntityPath=queue";
-    private String endpoint2 = "Endpoint=sb://trraspi.servicebus.windows.net/;SharedAccessKeyName=iothubroutes_FarmHub;SharedAccessKey=kWqUcF4qlNYgFdFs0cACm5qW4qFiw6b+Am+lvXpHzyo=;EntityPath=queue";
+    private String namespace = "farmiot.";
+    private String key1 = "mAxLq2xmPeZAWrHU6Q9QeWV7oFySuxoRBRsuU4VuTT8=";
+    private String key2 = "bSboJeK2ZZpWn9Aur9W6m33VvGkfZBC0FZTchEeEmyA=";
+    private String endpoint = "Endpoint=sb://farmiot.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=mAxLq2xmPeZAWrHU6Q9QeWV7oFySuxoRBRsuU4VuTT8=";
+    private String endpoint2 = "Endpoint=sb://farmiot.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=bSboJeK2ZZpWn9Aur9W6m33VvGkfZBC0FZTchEeEmyA=";
     private String addSensorQueue = "AddSensorQueue";
     private String sensorReadingQueue = "SensorReadingQueue";
     private String deleteSensorQueue = "DeleteSensorQueue";

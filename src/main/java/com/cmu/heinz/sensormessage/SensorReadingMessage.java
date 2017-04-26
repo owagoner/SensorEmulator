@@ -17,13 +17,11 @@ public class SensorReadingMessage {
     private String sensorHash;
     private String data;
     private Date date;
-    private String signature;
 
-    public SensorReadingMessage(String sensorHash, String data, Date date, String signature) {
+    public SensorReadingMessage(String sensorHash, String data, Date date) {
         this.sensorHash = sensorHash;
         this.data = data;
         this.date = date;
-        this.signature = signature;
     }
     
     public String serialize(){
