@@ -1,13 +1,14 @@
 package com.cmu.heinz.sensoremulator;
 
-import com.cmu.heinz.resources.RSA;
 import com.cmu.heinz.sensormessage.AddSensorMessage;
 import com.cmu.heinz.sensormessage.SensorReadingMessage;
 import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.Date;
 import java.util.Random;
-import org.bouncycastle.jcajce.provider.digest.Keccak;
 
 /**
  * @version 1.0
@@ -23,19 +24,21 @@ public class Sensor implements Runnable {
     private int dataValueMod;
     private String collectionName;
     private BigInteger d;
+    private BigInteger n;
     private BigInteger e = new BigInteger("65537");
     private boolean isCancelled = false;
     private ServiceQueue sq = new ServiceQueue();
 
     public Sensor(String sensorId, String sensorModel, String sensorManufacturer,
-            double sendFrequencyMin, int dataValueMod, String d) {
+            double sendFrequencyMin, int dataValueMod, String d, String n) {
         this.sensorId = sensorId;
         this.sensorModel = sensorModel;
         this.sensorManufacturer = sensorManufacturer;
-        this.sensorHash = getMetadataHash();
+        this.sensorHash = getMetadataHash(sensorId + sensorModel + sensorManufacturer);
         this.sendFrequencyMin = sendFrequencyMin;
         this.dataValueMod = dataValueMod;
         this.d = new BigInteger(d);
+        this.n = new BigInteger(n);
     }
 
     @Override
@@ -50,24 +53,21 @@ public class Sensor implements Runnable {
                 }
                 //Generate random reading
                 double currentDataReading = dataValueMod + rand.nextDouble() * 4 - 2;
-                
+
                 //Generate SRM object
                 SensorReadingMessage srm
                         = new SensorReadingMessage(sensorHash, Double.toString(currentDataReading), new Date());
                 //Serialize object
                 String srmStr = srm.serialize();
-                //Hash message
-                String hashedMessage = getKeccak256Hash(srmStr);
-                //New instance of simple rsa with sensor private key
-                RSA rsa = new RSA(d, e);
-                String encryptedHashedMessage = rsa.encrypt(hashedMessage);
-
+                
                 //send brokeredmessage
                 BrokeredMessage message = new BrokeredMessage(srmStr);
                 message.setDate(new Date());
-                message.setProperty("Signature", encryptedHashedMessage);
-                sq.sendSensorReadingMessage(message);
                 
+                String signature = getDataSignature(srmStr);
+                message.setProperty("Signature", signature);
+                sq.sendSensorReadingMessage(message);
+
                 System.out.println("Message sent: " + srmStr);
                 Thread.sleep(delayTime);
             }
@@ -76,6 +76,16 @@ public class Sensor implements Runnable {
         }
     }
 
+    public String getDataSignature(String message){
+        String hashedMessage = getMetadataHash(message);
+                
+        BigInteger hashMessageBigInt = new BigInteger(hashedMessage.getBytes());
+        
+        BigInteger signature = hashMessageBigInt.modPow(d, n);
+        
+        return signature.toString();
+    }
+    
     @Override
     public String toString() {
         return "SensorId: " + this.sensorId + " SendFrequencyMin: "
@@ -98,17 +108,15 @@ public class Sensor implements Runnable {
         this.collectionName = collectionName;
     }
 
-    private String getMetadataHash() {
-        Keccak.Digest256 digest = new Keccak.Digest256();
-        String str = this.sensorId + this.sensorModel + this.sensorManufacturer;
-        digest.update(str.getBytes());
-        return "0x" + bytesToHex(digest.digest());
-    }
-
-    private String getKeccak256Hash(String str) {
-        Keccak.Digest256 digest = new Keccak.Digest256();
-        digest.update(str.getBytes());
-        return bytesToHex(digest.digest());
+    private String getMetadataHash(String str) {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+            return bytesToHex(digest.digest(str.getBytes(StandardCharsets.UTF_8)));
+        } catch (NoSuchAlgorithmException ex) {
+            System.out.println("Error getting digest");
+            return null;
+        }
     }
 
     private final char[] hexArray = "0123456789abcdef".toCharArray();
