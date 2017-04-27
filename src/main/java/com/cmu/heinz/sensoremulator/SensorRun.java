@@ -27,10 +27,10 @@ public class SensorRun {
         String n4 = "6312257328424637714031383539187009920627377887200953615994825511658084909292890497646408273414285478809250241989576125362382196426144064760027511411267711";
         //String e = "65537";
         
-        Sensor s = new Sensor("serial1", "model1", "manufacturer1", 3, 5, d1, n1);
-        Sensor s2 = new Sensor("serial2", "model2", "manufacturer1", 5, 5, d2, n2);
-        Sensor s3 = new Sensor("serial3", "model1", "manufacturer2", 4, 5, d3, n3);
-        Sensor s4 = new Sensor("serial4", "model1", "manufacturer2", 10, 5, d4, n4);
+        Sensor s = new Sensor("serial1", "model1", "manufacturer1", 1.5, 5, d1, n1);
+        Sensor s2 = new Sensor("serial2", "model2", "manufacturer1", 2, 5, d2, n2);
+        Sensor s3 = new Sensor("serial3", "model1", "manufacturer2", 1.5, 5, d3, n3);
+        Sensor s4 = new Sensor("serial4", "model1", "manufacturer2", 2, 5, d4, n4);
         sensorGroup.addSensor(s);
         sensorGroup.addSensor(s2);
         sensorGroup.addSensor(s3);
