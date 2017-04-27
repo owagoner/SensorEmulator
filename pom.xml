@@ -4,6 +4,15 @@
     <groupId>com.cmu.heinz</groupId>
     <artifactId>SensorEmulator</artifactId>
     <version>1.0-SNAPSHOT</version>
+    <configuration>
+        <archive>
+            <manifest>
+                <addClasspath>true</addClasspath>
+                <classpathPrefix>lib/</classpathPrefix>
+                <mainClass>com.cmu.heinz.sensoremulator.SensorRun</mainClass>
+            </manifest>
+        </archive>
+    </configuration>
     <packaging>jar</packaging>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

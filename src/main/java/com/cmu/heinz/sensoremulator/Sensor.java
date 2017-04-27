@@ -77,6 +77,7 @@ public class Sensor implements Runnable {
     }
 
     public String getDataSignature(String message){
+        System.out.println("Message||" + message + "||end message");
         String hashedMessage = getMetadataHash(message);
                 
         BigInteger hashMessageBigInt = new BigInteger(hashedMessage.getBytes());
