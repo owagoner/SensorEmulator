@@ -1,22 +1,23 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cmu.heinz.sensormessage;
 
 import com.google.gson.Gson;
 
 /**
- *
  * @author owagoner
  */
 public class AddSensorMessage {
-    private String sensorId;
-    private String sensorModel;
-    private String sensorManufacturer;
-    private String sensorHash;
+    private final String sensorId;
+    private final String sensorModel;
+    private final String sensorManufacturer;
+    private final String sensorHash;
 
+    /**
+     *
+     * @param sensorId - sensor serial or other id.
+     * @param sensorModel - sensor model.
+     * @param sensorManufacturer - sensor manufacturer.
+     * @param sensorHash - SHA256 hash of sensorId, sensorModel, and sensorHash.
+     */
     public AddSensorMessage(String sensorId, String sensorModel, String sensorManufacturer, String sensorHash) {
         this.sensorId = sensorId;
         this.sensorModel = sensorModel;
@@ -24,6 +25,10 @@ public class AddSensorMessage {
         this.sensorHash = sensorHash;
     }
     
+    /**
+     * JSON serialized string of object.
+     * @return JSON string.
+     */
     public String serialize(){
         Gson gson = new Gson();
         return gson.toJson(this);

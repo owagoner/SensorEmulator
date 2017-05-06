@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.cmu.heinz.sensoremulator;
 
 import com.microsoft.windowsazure.services.servicebus.models.BrokeredMessage;
@@ -11,8 +6,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 /**
- *
- * @author owagoner
+ * @version 1.0
+ * @author Owen Wagoner - Carnegie Mellon University - Heinz College
  */
 public class SensorGroup {
 
@@ -20,7 +15,14 @@ public class SensorGroup {
     private List<Sensor> runningSensors = new ArrayList<>();
     private List<Sensor> stoppedSensors = new ArrayList<>();
     private ServiceQueue sq = new ServiceQueue();
-
+    
+    private final String addSensorQueue = "AddSensorQueue";
+    private final String deleteSensorQueue = "DeleteSensorQueue";
+    
+    /**
+     * Adds a new sensor to stoppedSensors list
+     * @param sensor - Sensor object to add
+     */
     public void addSensor(Sensor sensor) {
         sensors.add(sensor);
         stoppedSensors.add(sensor);
@@ -28,7 +30,7 @@ public class SensorGroup {
         BrokeredMessage m1 = new BrokeredMessage(sensor.getAddSensorMessage().serialize());
         m1.setDate(new Date());
 
-        boolean r1 = sq.sendAddSensorMessage(m1);
+        boolean r1 = sq.sendMessage(m1, addSensorQueue);
         if (r1) {
             System.out.println("Sensor successfully added.");
         } else {
@@ -39,6 +41,9 @@ public class SensorGroup {
         }
     }
 
+    /**
+     * Lists sensors in sensor list.
+     */
     public void listSensors() {
         int cnt = 1;
         if (sensors.size() < 1) {
@@ -51,6 +56,9 @@ public class SensorGroup {
         }
     }
 
+    /**
+     * Lists sensors in running sensor list.
+     */
     public void listRunningSensors() {
         int cnt = 1;
         if (runningSensors.size() < 1) {
@@ -64,6 +72,9 @@ public class SensorGroup {
         }
     }
     
+    /**
+     * Lists sensors in stopped sensor list.
+     */
     public void listStoppedSensors(){
         int cnt = 1;
         if (stoppedSensors.size() < 1) {
@@ -77,13 +88,17 @@ public class SensorGroup {
         }
     }
     
+    /**
+     * Deletes a sensor from sensor group.
+     * @param deleteSensorNum - index number of sensor to delete.
+     */
     public void deleteSensor(int deleteSensorNum) {
         Sensor sensorToRemove = sensors.get(deleteSensorNum - 1);
 
         BrokeredMessage message = new BrokeredMessage(sensorToRemove.getAddSensorMessage().serialize());
         message.setDate(new Date());
-        boolean result  = sq.sendDeleteSensorMessage(message);
-        if(true){
+        boolean result  = sq.sendMessage(message, deleteSensorQueue);
+        if(result){
             sensorToRemove.stopSensor();
             stoppedSensors.remove(sensorToRemove);
             runningSensors.remove(sensorToRemove);
@@ -96,6 +111,11 @@ public class SensorGroup {
 
     }
 
+    /**
+     * Method starts sensor with the provided index value.
+     * @param sensorToRun - index value of sensor to start.
+     * @param executor - executor to run sensor.
+     */
     public void startSensor(int sensorToRun, ExecutorService executor) {
         Sensor sensor = stoppedSensors.get(sensorToRun - 1);
         try {
@@ -109,6 +129,11 @@ public class SensorGroup {
 
     }
 
+    /**
+     * Stops the sensor with the given index. 
+     * @param sensorToStop - index of sensor to stop.
+     * @param executor - executor on which sensor is running.
+     */
     public void stopSensor(int sensorToStop, ExecutorService executor) {
         Sensor sensor = runningSensors.get(sensorToStop - 1);
         sensor.stopSensor();
